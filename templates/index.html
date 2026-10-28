@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Campus Access Control</title>
+<!-- ===================== CSS: colors and layout ===================== -->
+<style>
+    :root {
+      box-sizing:border-box;
+      padding-top:env(safe-area-inset-top,0px);
+      padding-bottom:env(safe-area-inset-bottom,0px);
+      --bg:#f3f4fb;
+      --card:#fff;
+      --side:#161a3d;
+      --sideink:#b8bfe6;
+      --ink:#161a2e;
+      --mute:#697089;
+      --line:#e3e5f1;
+      --acc:#4f5fe8;
+      --acc2:#e8eaff;
+      --onacc:#fff;
+      --ok:#12874a;
+      --okbg:#e2f6ea;
+      --onok:#fff;
+      --no:#c8382c;
+      --nobg:#fdebe9;
+      --gold:#f5b73d;
+      --sh:0 1px 3px rgba(22,26,61,.1);
+      --sb:#e3ecff;
+      --sc:#2f55d4;
+      --fb:#efe6ff;
+      --fc:#6a3fc0;
+      --tb:#fff0d6;
+      --tc:#9a5a00;
+      --vb:#e9ecf1;
+      --vc:#566275;
+    }
+
+    @media (prefers-color-scheme:dark) {
+      :root:not([data-theme="light"]) {
+        --bg:#0a0d1f;
+        --card:#141934;
+        --side:#0d1030;
+        --sideink:#9aa3d6;
+        --ink:#eceefb;
+        --mute:#9aa1c4;
+        --line:#262c52;
+        --acc:#7b8cff;
+        --acc2:#222a63;
+        --onacc:#0a0d1f;
+        --ok:#5ad183;
+        --okbg:#12301f;
+        --onok:#06210f;
+        --no:#ff8a80;
+        --nobg:#3a1815;
+        --gold:#f5b73d;
+        --sh:0 1px 2px rgba(0,0,0,.35);
+        --sb:#1c2a5c;
+        --sc:#8fa8ff;
+        --fb:#2c1f55;
+        --fc:#c3a6ff;
+        --tb:#4a3510;
+        --tc:#ffc66b;
+        --vb:#272c3a;
+        --vc:#aab3c5;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg:#0a0d1f;
+      --card:#141934;
+      --side:#0d1030;
+      --sideink:#9aa3d6;
+      --ink:#eceefb;
+      --mute:#9aa1c4;
+      --line:#262c52;
+      --acc:#7b8cff;
+      --acc2:#222a63;
+      --onacc:#0a0d1f;
+      --ok:#5ad183;
+      --okbg:#12301f;
+      --onok:#06210f;
+      --no:#ff8a80;
+      --nobg:#3a1815;
+      --gold:#f5b73d;
+      --sh:0 1px 2px rgba(0,0,0,.35);
+      --sb:#1c2a5c;
+      --sc:#8fa8ff;
+      --fb:#2c1f55;
+      --fc:#c3a6ff;
+      --tb:#4a3510;
+      --tc:#ffc66b;
+      --vb:#272c3a;
+      --vc:#aab3c5;
+    }
+
+    * {
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    button,select {
+      touch-action:manipulation;
+    }
+
+    [hidden] {
+      display:none!important;
+    }
+
+    html,body {
+      height:100%;
+    }
+
+    body {
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font:15px/1.5 "Trebuchet MS",Verdana,sans-serif;
+    }
+
+    h1,h2,h3 {
+      font-family:Georgia,serif;
+      margin:0;
+    }
+
+    #login {
+      min-height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      background:radial-gradient(circle at 20% 10%,var(--acc2),transparent 55%),var(--bg);
+    }
+
+    #login .card {
+      width:100%;
+      max-width:370px;
+      padding:28px 24px;
+      text-align:center;
+    }
+
+    #login .lock {
+      width:64px;
+      height:64px;
+      margin:0 auto 12px;
+      border-radius:18px;
+      background:var(--side);
+      display:grid;
+      place-items:center;
+      font-size:30px;
+    }
+
+    #login h1 {
+      font-size:24px;
+      margin-bottom:2px;
+    }
+
+    #login label {
+      text-align:left;
+    }
+
+    .app {
+      display:grid;
+      grid-template-columns:96px 1fr;
+      min-height:100%;
+    }
+
+    aside {
+      background:var(--side);
+      color:var(--sideink);
+      padding:12px 8px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      position:sticky;
+      top:env(safe-area-inset-top,0px);
+      height:100vh;
+      height:100dvh;
+      overflow-y:auto;
+      align-self:start;
+    }
+
+    aside .brand {
+      font:700 13px Georgia,serif;
+      text-align:center;
+      padding:4px 0 10px;
+      line-height:1.2;
+      color:#fff;
+    }
+
+    aside button {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:2px;
+      background:none;
+      border:0;
+      color:inherit;
+      padding:9px 4px;
+      border-radius:12px;
+      font:inherit;
+      font-size:12px;
+      line-height:1.2;
+      cursor:pointer;
+      text-align:center;
+    }
+
+    aside button span {
+      font-size:20px;
+    }
+
+    aside button:hover {
+      background:#ffffff14;
+    }
+
+    aside button[aria-current="true"] {
+      background:var(--acc);
+      color:var(--onacc);
+      font-weight:700;
+    }
+
+    .pane {
+      padding:18px 16px 40px;
+      min-width:0;
+      max-width:700px;
+      width:100%;
+    }
+
+    .top {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:14px;
+      gap:8px;
+    }
+
+    .top h2 {
+      font-size:22px;
+    }
+
+    .top small {
+      color:var(--mute);
+    }
+
+    .top button {
+      border:1px solid var(--line);
+      background:var(--card);
+      color:var(--ink);
+      border-radius:999px;
+      padding:7px 14px;
+      font:inherit;
+      font-size:13px;
+      cursor:pointer;
+      box-shadow:var(--sh);
+    }
+
+    section {
+      display:none;
+    }
+
+    section.on {
+      display:block;
+    }
+
+    .card {
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:16px;
+      margin-bottom:14px;
+      box-shadow:var(--sh);
+    }
+
+    h3 {
+      font-size:16px;
+      margin-bottom:10px;
+    }
+
+    label {
+      display:block;
+      font-size:13px;
+      color:var(--mute);
+      margin:12px 0 5px;
+    }
+
+    input,select,textarea {
+      width:100%;
+      padding:11px 12px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:var(--bg);
+      color:var(--ink);
+      font:inherit;
+    }
+
+    input:focus,select:focus,textarea:focus {
+      border-color:var(--acc);
+    }
+
+    textarea {
+      min-height:130px;
+      font:12px/1.4 monospace;
+    }
+
+    input[type=checkbox] {
+      width:18px;
+      height:18px;
+      accent-color:var(--acc);
+    }
+
+    button.go {
+      margin-top:14px;
+      width:100%;
+      padding:13px;
+      border:0;
+      border-radius:12px;
+      background:var(--acc);
+      color:var(--onacc);
+      font:700 15px "Trebuchet MS",Verdana,sans-serif;
+      cursor:pointer;
+    }
+
+    button.go:active {
+      transform:scale(.98);
+    }
+
+    button.go.alt {
+      background:none;
+      color:var(--ink);
+      border:1px solid var(--line);
+      margin-top:8px;
+    }
+
+    button.sm {
+      border:1px solid var(--line);
+      background:none;
+      color:var(--no);
+      border-radius:8px;
+      padding:4px 10px;
+      cursor:pointer;
+      font:inherit;
+      font-size:13px;
+    }
+
+    button.sm.ed {
+      color:var(--acc);
+    }
+
+    button.cell {
+      width:38px;
+      height:32px;
+      border-radius:8px;
+      border:0;
+      background:var(--line);
+      color:var(--mute);
+      font:700 14px inherit;
+      font-family:inherit;
+      cursor:pointer;
+    }
+
+    button.cell.on {
+      background:var(--ok);
+      color:var(--onok);
+    }
+
+    button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible {
+      outline:2px solid var(--acc);
+      outline-offset:2px;
+    }
+
+    .res {
+      margin-top:14px;
+      padding:16px;
+      border-radius:14px;
+      font-weight:700;
+      font-size:19px;
+      text-align:center;
+    }
+
+    .res.ok {
+      background:var(--okbg);
+      color:var(--ok);
+    }
+
+    .res.no {
+      background:var(--nobg);
+      color:var(--no);
+    }
+
+    .steps {
+      margin:12px 0 0;
+      padding:0;
+      list-style:none;
+      border-left:3px solid var(--line);
+    }
+
+    .steps li {
+      padding:7px 0 7px 14px;
+    }
+
+    .steps li b {
+      display:block;
+      font-size:13px;
+      color:var(--mute);
+      font-weight:400;
+    }
+
+    .steps li.p {
+      border-left:3px solid var(--ok);
+      margin-left:-3px;
+    }
+
+    .steps li.f {
+      border-left:3px solid var(--no);
+      margin-left:-3px;
+    }
+
+    .chips {
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:10px;
+    }
+
+    .chip {
+      padding:3px 11px;
+      border-radius:999px;
+      font-size:12px;
+      background:var(--acc2);
+      color:var(--acc);
+    }
+
+    .stats {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+      margin-bottom:14px;
+    }
+
+    .stat {
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      text-align:center;
+      box-shadow:var(--sh);
+    }
+
+    .stat b {
+      display:block;
+      font:700 24px Georgia,serif;
+    }
+
+    .stat span {
+      font-size:12px;
+      color:var(--mute);
+    }
+
+    table {
+      border-collapse:collapse;
+      width:100%;
+      font-size:14px;
+    }
+
+    th,td {
+      border-bottom:1px solid var(--line);
+      padding:8px 6px;
+      text-align:center;
+    }
+
+    th:first-child,td:first-child {
+      text-align:left;
+    }
+
+    th {
+      font-size:12px;
+      color:var(--mute);
+      font-weight:600;
+    }
+
+    .wrap {
+      overflow-x:auto;
+    }
+
+    .y {
+      color:var(--ok);
+      font-weight:700;
+    }
+
+    .n {
+      color:var(--no);
+    }
+
+    .row {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      padding:10px 0;
+      border-bottom:1px solid var(--line);
+    }
+
+    .row:last-child {
+      border-bottom:0;
+    }
+
+    .row .l {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .av {
+      flex:none;
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      font-weight:700;
+      font-size:14px;
+      background:var(--acc2);
+      color:var(--acc);
+    }
+
+    .av.Student {
+      background:var(--sb);
+      color:var(--sc);
+    }
+
+    .av.Faculty {
+      background:var(--fb);
+      color:var(--fc);
+    }
+
+    .av.Staff {
+      background:var(--tb);
+      color:var(--tc);
+    }
+
+    .av.Visitor {
+      background:var(--vb);
+      color:var(--vc);
+    }
+
+    .row .b {
+      display:flex;
+      gap:6px;
+      flex:none;
+    }
+
+    .row small,.note {
+      color:var(--mute);
+      font-size:13px;
+    }
+
+    .badge {
+      display:inline-block;
+      font-size:11px;
+      padding:0 7px;
+      border-radius:999px;
+      margin-left:4px;
+    }
+
+    .badge.a {
+      background:var(--okbg);
+      color:var(--ok);
+    }
+
+    .badge.r {
+      background:var(--nobg);
+      color:var(--no);
+    }
+
+    .two {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    code {
+      background:var(--bg);
+      padding:1px 6px;
+      border-radius:5px;
+    }
+
+    .sw {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .err {
+      color:var(--no);
+      font-size:13px;
+      min-height:18px;
+      margin-top:8px;
+      text-align:left;
+    }
+
+    aside .out {
+      margin-top:10px;
+      padding-top:14px;
+      border-top:1px solid #ffffff1f;
+      border-radius:0;
+    }
+
+    aside button[aria-current="true"] {
+      box-shadow:inset 3px 0 0 var(--gold);
+    }
+
+    .set {
+      --c:var(--sc);
+      --b:var(--sb);
+    }
+
+    .set.Faculty {
+      --c:var(--fc);
+      --b:var(--fb);
+    }
+
+    .set.Staff {
+      --c:var(--tc);
+      --b:var(--tb);
+    }
+
+    .set.Visitor {
+      --c:var(--vc);
+      --b:var(--vb);
+    }
+
+    .set.A {
+      --c:var(--ok);
+      --b:var(--okbg);
+    }
+
+    .set.R {
+      --c:var(--no);
+      --b:var(--nobg);
+    }
+
+    .set {
+      border-top:4px solid var(--c);
+    }
+
+    .sh {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:10px;
+    }
+
+    .sl {
+      width:44px;
+      height:44px;
+      border-radius:12px;
+      background:var(--b);
+      color:var(--c);
+      display:grid;
+      place-items:center;
+      font:700 20px Georgia,serif;
+    }
+
+    .sh h3 {
+      margin:0;
+    }
+
+    .sh small {
+      color:var(--mute);
+      font-size:12px;
+    }
+
+    .sh .cnt {
+      margin-left:auto;
+      font:700 13px Georgia,serif;
+      background:var(--b);
+      color:var(--c);
+      padding:4px 10px;
+      border-radius:999px;
+    }
+
+    .mems {
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+
+    .mem {
+      background:var(--b);
+      color:var(--c);
+      padding:4px 12px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .empty {
+      color:var(--mute);
+      font-size:20px;
+    }
+
+    .pill {
+      font-size:12px;
+      font-weight:700;
+      padding:3px 12px;
+      border-radius:999px;
+    }
+
+    .pill.y {
+      background:var(--okbg);
+      color:var(--ok);
+    }
+
+    .pill.n {
+      background:var(--nobg);
+      color:var(--no);
+    }
+
+    body[data-role="user"] .adm {
+      display:none;
+    }
+
+    span.cell {
+      display:inline-grid;
+      place-items:center;
+      width:38px;
+      height:32px;
+      border-radius:8px;
+      background:var(--line);
+      color:var(--mute);
+      font-weight:700;
+    }
+
+    span.cell.on {
+      background:var(--ok);
+      color:var(--onok);
+    }
+
+    .prof {
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .av.big {
+      width:60px;
+      height:60px;
+      font-size:20px;
+    }
+
+    .facs {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .fac {
+      border-radius:12px;
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      border:1px solid var(--line);
+    }
+
+    .fac span {
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .fac.ok {
+      background:var(--okbg);
+      color:var(--ok);
+    }
+
+    .fac.no {
+      background:var(--nobg);
+      color:var(--no);
+    }
+
+    #toast {
+      position:fixed;
+      left:50%;
+      bottom:calc(20px + env(safe-area-inset-bottom,0px));
+      transform:translate(-50%,30px);
+      background:var(--side);
+      color:#fff;
+      padding:10px 18px;
+      border-radius:999px;
+      font-size:14px;
+      opacity:0;
+      pointer-events:none;
+      transition:.25s;
+      z-index:9;
+    }
+
+    #toast.on {
+      opacity:1;
+      transform:translate(-50%,0);
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      #toast,button.go {
+        transition:none;
+      }
+    }
+
+</style>
+</head>
+<body>
+
+<!-- ===================== HTML: the pages ===================== -->
+<div id="login"><div class="card"><div class="lock">🔐</div>
+<h1>Campus Access Control</h1><p class="note">Administrator sign in</p>
+<label for="lu">Username</label><input id="lu" autocomplete="username">
+<label for="lp">Password</label><input id="lp" type="password" autocomplete="current-password">
+<div class="err" id="le"></div>
+<button class="go" id="lb">Sign in</button>
+<p class="note">Admin: <code>admin</code> / <code>admin123</code><br>User: your name and your ID, e.g. <code>Ck</code> / <code>2024102</code></p>
+</div></div>
+
+<div class="app" id="app" hidden>
+<aside id="side"><div class="brand">Access<br>Control</div></aside>
+<div class="pane">
+<div class="top"><div><h2 id="title"></h2><small id="who"></small></div></div>
+
+<section id="me"><div id="mc"></div></section>
+<section id="check"><div class="card"><h3>Check access</h3>
+<label for="cn">User</label><select id="cn"></select>
+<p class="note" id="cid"></p>
+<div id="oth" hidden><label for="on">Name of the person</label><input id="on" placeholder="Not registered"><label for="oi">ID number</label><input id="oi" type="number"></div>
+<label for="cf">Facility</label><select id="cf"></select>
+<button class="go" id="cb">Run check</button></div>
+<div id="cr"></div></section>
+
+<section id="users"><div class="stats" id="st"></div><div class="card"><h3 id="ft">Add user</h3>
+<label for="an">Name</label><input id="an">
+<label for="ai">ID number</label><input id="ai" type="number">
+<label for="at">User type</label><select id="at"></select>
+<div class="sw"><input type="checkbox" id="aa"><span>Authorized</span></div>
+<div class="sw"><input type="checkbox" id="ar"><span>Restricted</span></div>
+<button class="go" id="ab">Add user</button>
+<button class="go alt" id="ac" hidden>Cancel edit</button><p class="note" id="am"></p></div>
+<div class="card"><h3>All users</h3><div id="ul"></div></div></section>
+
+<section id="sets"><div id="sl"></div></section>
+
+<section id="rel"><div class="card"><h3>Access matrix</h3>
+<p class="note">1 = allowed, 0 = denied. <span class="adm">Tap a cell to change it.</span></p>
+<div class="wrap"><table id="mx"></table></div></div>
+<div class="card"><h3>Relation pairs (user type, facility)</h3><div id="pairs" class="chips"></div></div></section>
+
+<section id="nt"><div class="card adm"><h3>ComLab ID rule</h3>
+<div class="sw"><input type="checkbox" id="evenRule"><span>Require an even ID (ID mod 2 = 0)</span></div></div>
+<div class="card"><h3>GCD, LCM and mod</h3>
+<div class="two"><div><label for="na">First ID</label><input id="na" type="number"></div>
+<div><label for="nb">Second ID</label><input id="nb" type="number"></div></div>
+<button class="go" id="nbtn">Calculate</button><div id="nr"></div>
+<p class="note">Two users can share a locker if gcd(ID1, ID2) = 1.</p></div></section>
+
+<section id="log"><div class="card"><h3>Access log</h3><div id="ll"></div>
+<button class="go" id="lc">Clear log</button></div></section>
+
+<section id="why"><div class="card"><h3>Rule</h3>
+<p><code>Access = (type in relation ∨ authorized for Library) ∧ ¬R ∧ ID rule</code></p>
+<p class="note">Truth table of the core part P ∧ ¬R, computed by the program:</p>
+<div class="wrap"><table id="tt"></table></div></div>
+<div class="card"><h3>Consistency check</h3>
+<p class="note">Runs the real access function on every restricted user and every facility, and on every user type with R = true, and counts any case that gets access.</p>
+<button class="go" id="vb">Run proof check</button><div id="vr"></div></div></section>
+
+<section id="bk"><div class="card"><h3>Backup</h3>
+<p class="note">Export fills the box with your data. Copy it somewhere safe. To restore, paste it back and tap Import.</p>
+<textarea id="bt" aria-label="Backup data"></textarea>
+<button class="go" id="be">Export</button><button class="go alt" id="bi">Import</button>
+<button class="go alt" id="br">Reset to default data</button><p class="note" id="bm"></p></div></section>
+</div></div>
+<div id="toast" role="status"></div>
+
+<script>
+    // ===================== JAVASCRIPT =====================
+    // This page only DRAWS things. app.py (Flask) makes every decision:
+    // login, the access rule, the proof check, the math and the saving.
+
+    const TYPES = ["Student", "Faculty", "Staff", "Visitor"];
+    const FAC = ["Library", "ComLab", "Faculty Room", "Office", "ComLec"];
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+    // The data (users, relation, rules, log). It is loaded from Flask, never saved in the browser.
+    let S = { users: {}, rel: [], even: false, log: [], mine: {} };
+    let role = null, me = null, cur = "check";
+    let pend = null, editing = null;
+
+    const NAV = {
+      admin: ["check", "users", "sets", "rel", "nt", "log", "why", "bk"],
+      user: ["me", "check", "sets", "rel", "nt", "why"],
+    };
+    const TABS = [
+      ["me", "My access", "🪪"], ["check", "Check access", "🛡️"], ["users", "Users", "👥"],
+      ["sets", "Sets", "🧩"], ["rel", "Relations", "🔗"], ["nt", "Number theory", "🔢"],
+      ["log", "Access log", "📜"], ["why", "Logic proof", "✅"], ["bk", "Backup", "💾"],
+    ];
+
+    // ---------- talking to Flask ----------
+    async function api(url, body) {
+      const options = body === undefined ? {} :
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+      const reply = await fetch(url, options);
+      let data = {};
+      try { data = await reply.json(); } catch (e) { /* no body */ }
+      if (reply.status === 401 && url !== "/api/login") { signOut(false); return null; }
+      return { ok: reply.ok, data };
+    }
+
+    async function loadState() {
+      const r = await api("/api/state");
+      if (r && r.ok) S = r.data;
+    }
+
+    // ---------- login, menu, sign out ----------
+    function buildNav() {
+      const a = $("side");
+      a.innerHTML = '<div class="brand">Access<br>Control</div>';
+      TABS.filter(([k]) => NAV[role].includes(k)).forEach(([id, t, ic]) => {
+        const b = document.createElement("button");
+        b.innerHTML = `<span>${ic}</span>${t == "Check access" ? "Check" : t}`;
+        b.dataset.tab = id;
+        a.appendChild(b);
+      });
+      const o = document.createElement("button");
+      o.id = "so";
+      o.className = "out";
+      o.innerHTML = "<span>🚪</span>Sign out";
+      o.onclick = () => signOut(true);
+      a.appendChild(o);
+    }
+
+    async function login() {
+      const r = await api("/api/login", { username: $("lu").value.trim(), password: $("lp").value });
+      if (!r.ok) { $("le").textContent = "Wrong username or password."; return; }
+      enter(r.data.role, r.data.me);
+    }
+
+    async function enter(r, name) {
+      role = r;
+      me = name;
+      $("le").textContent = "";
+      $("lp").value = "";
+      $("login").hidden = true;
+      $("app").hidden = false;
+      $("who").textContent = r == "admin" ? "Signed in as admin" : "Signed in as " + me;
+      document.body.dataset.role = r;
+      buildNav();
+      show(r == "admin" ? "check" : "me");
+    }
+
+    async function signOut(callServer) {
+      if (callServer) await api("/api/logout", {});
+      role = null;
+      me = null;
+      $("app").hidden = true;
+      $("login").hidden = false;
+      $("lu").value = "";
+      $("cr").innerHTML = "";
+    }
+
+    $("lb").onclick = login;
+    [$("lu"), $("lp")].forEach((i) => i.onkeydown = (e) => { if (e.key == "Enter") login(); });
+
+    async function show(id) {
+      cur = id;
+      pend = null;
+      $("cr").innerHTML = "";
+      TABS.forEach(([k, t]) => {
+        $(k).classList.toggle("on", k == id);
+        if (k == id) $("title").textContent = t;
+      });
+      document.querySelectorAll("aside [data-tab]").forEach((b) =>
+        b.setAttribute("aria-current", b.dataset.tab == id));
+      window.scrollTo(0, 0);
+      await loadState();          // always show the newest data from Flask
+      if (cur == id) render();
+    }
+
+    let tt0;
+    function toast(m) {
+      const t = $("toast");
+      t.textContent = m;
+      t.classList.add("on");
+      clearTimeout(tt0);
+      tt0 = setTimeout(() => t.classList.remove("on"), 1800);
+    }
+    const opt = (a) => a.map((x) => `<option>${esc(x)}</option>`).join("");
+
+    // ---------- drawing the pages (only the open page is drawn) ----------
+    function render() {
+      if (cur == "check") {
+        const keep = $("cn").value, usr = role == "user";
+        $("cn").innerHTML = opt(usr ? [me] : Object.keys(S.users)) + (usr ? "" : '<option value="__o">Someone not registered</option>');
+        $("cn").disabled = usr;
+        if (usr) $("cn").value = me;
+        else if (keep && [...$("cn").options].some((o) => o.value == keep)) $("cn").value = keep;
+        chSel();
+      }
+      if (!$("cf").innerHTML) { $("cf").innerHTML = opt(FAC); $("at").innerHTML = opt(TYPES); }
+      if (cur == "nt") $("evenRule").checked = S.even;
+      if (cur == "me") renderMe();
+
+      if (cur == "users") {
+        $("ul").innerHTML = Object.entries(S.users).map(([n, u]) => `<div class="row"><div class="l"><div class="av ${u.t}">${esc(n.replace(/^Sir\.? /, "").slice(0, 2))}</div><div>${esc(n)} <small>#${u.id}</small><br><small>${u.t}</small>${u.a ? '<span class="badge a">authorized</span>' : ""}${u.r ? '<span class="badge r">restricted</span>' : ""}</div></div><div class="b"><button class="sm ed" data-e="${esc(n)}">Edit</button><button class="sm" data-d="${esc(n)}">${pend == n ? "Sure? Remove" : "Remove"}</button></div></div>`).join("") || '<p class="note">No users yet.</p>';
+        const us = Object.values(S.users);
+        $("st").innerHTML = [["Users", us.length], ["Authorized", us.filter((u) => u.a).length], ["Restricted", us.filter((u) => u.r).length]]
+          .map(([k, v]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`).join("");
+      }
+
+      const grp = (f) => Object.keys(S.users).filter((n) => f(S.users[n]));
+      if (cur == "sets") {
+        const sets = [["Student", "S", "Students", grp((u) => u.t == "Student")], ["Faculty", "F", "Faculty", grp((u) => u.t == "Faculty")],
+          ["Staff", "T", "Staff", grp((u) => u.t == "Staff")], ["Visitor", "V", "Visitors", grp((u) => u.t == "Visitor")],
+          ["A", "A", "Authorized users", grp((u) => u.a)], ["R", "R", "Restricted users", grp((u) => u.r)]];
+        const both = grp((u) => u.a && u.r);
+        $("sl").innerHTML = sets.map(([c, l, t, v]) => `<div class="card set ${c}"><div class="sh"><div class="sl">${l}</div><div><h3>${t}</h3><small>${l} = {${v.map(esc).join(", ")}}</small></div><span class="cnt">|${l}| = ${v.length}</span></div><div class="mems">${v.length ? v.map((n) => `<span class="mem">${esc(n)}</span>`).join("") : '<span class="empty">∅</span>'}</div></div>`).join("") +
+          `<div class="card"><h3>Set check</h3><p class="note">|U| = ${Object.keys(S.users).length} users in total.<br>A ∩ R = {${both.map(esc).join(", ")}} ${both.length ? "(a user who is both gets denied, because R wins)" : "(nobody is both authorized and restricted)"}</p></div>`;
+      }
+
+      if (cur == "rel") {
+        $("mx").innerHTML = "<tr><th>Type</th>" + FAC.map((f) => `<th>${f}</th>`).join("") + "</tr>" +
+          TYPES.map((t) => `<tr><td>${t}</td>` + FAC.map((f) => {
+            const on = S.rel.includes(t + "|" + f);
+            return `<td>${role == "admin" ? `<button class="cell ${on ? "on" : ""}" data-t="${t}|${f}" aria-label="${t} ${f}">${on ? 1 : 0}</button>` : `<span class="cell ${on ? "on" : ""}">${on ? 1 : 0}</span>`}</td>`;
+          }).join("") + "</tr>").join("");
+        $("pairs").innerHTML = S.rel.map((p) => `<span class="chip">(${p.split("|").join(", ")})</span>`).join("") || '<p class="note">No pairs. Nobody can enter anywhere.</p>';
+      }
+
+      if (cur == "log") {
+        $("ll").innerHTML = S.log.map((l) => `<div class="row"><div>${esc(l.n)} → ${l.f}<br><small>${l.t}</small></div><span class="pill ${l.ok ? "y" : "n"}">${l.ok ? "Granted" : "Denied"}</span></div>`).join("") || '<p class="note">No checks yet.</p>';
+      }
+
+      if (cur == "why") {
+        const tt = [];
+        for (const p of [0, 1]) for (const r of [0, 1]) tt.push(`<tr><td>${p}</td><td>${r}</td><td class="${p && !r ? "y" : "n"}">${p && !r ? 1 : 0}</td></tr>`);
+        $("tt").innerHTML = "<tr><th>P (type allowed)</th><th>R (restricted)</th><th>P ∧ ¬R</th></tr>" + tt.join("");
+      }
+    }
+
+    function renderMe() {
+      const u = S.users[me];
+      if (!u) { $("mc").innerHTML = '<div class="card">Your account was removed. Ask an admin.</div>'; return; }
+      const rows = FAC.map((f) => `<div class="fac ${S.mine[f] ? "ok" : "no"}"><b>${f}</b><span>${S.mine[f] ? "✔ Allowed" : "✖ Denied"}</span></div>`).join("");
+      $("mc").innerHTML = `<div class="card prof"><div class="av big ${u.t}">${esc(me.replace(/^Sir\.? /, "").slice(0, 2))}</div><div><h3>${esc(me)}</h3><span class="note">${u.t} · ID #${u.id}</span><br>${u.a ? '<span class="badge a" style="margin:0 4px 0 0">authorized</span>' : ""}${u.r ? '<span class="badge r" style="margin:0">restricted</span>' : ""}</div></div><div class="card"><h3>Your facilities</h3><div class="facs">${rows}</div><p class="note">Based on the current rules set by the admin.</p></div>`;
+    }
+
+    function chSel() {
+      const o = $("cn").value == "__o";
+      $("oth").hidden = !o;
+      $("cid").hidden = o;
+      if (!o && S.users[$("cn").value]) $("cid").textContent = "ID on file: " + S.users[$("cn").value].id;
+    }
+    $("cn").onchange = () => { chSel(); $("cr").innerHTML = ""; };
+    $("cf").onchange = () => { $("cr").innerHTML = ""; };
+
+    // ---------- Check access: Flask decides, the page shows the steps ----------
+    $("cb").onclick = async () => {
+      const r = await api("/api/check", { user: $("cn").value, other_name: $("on").value, other_id: $("oi").value, facility: $("cf").value });
+      if (!r) return;
+      if (!r.ok) { $("cr").innerHTML = `<div class="res no">${esc(r.data.error)}</div>`; return; }
+      const d = r.data;
+      $("cr").innerHTML = `<div class="card"><h3>Process</h3><ul class="steps">${d.steps.map((s) => `<li class="${s.ok ? "p" : "f"}">${esc(s.title)}<b>${esc(s.detail)}</b></li>`).join("")}</ul><div class="res ${d.allowed ? "ok" : "no"}">${d.allowed ? "✔ ACCESS GRANTED" : "✖ ACCESS DENIED"}</div></div>`;
+    };
+
+    // ---------- Users: add / edit / remove ----------
+    function endEdit() {
+      editing = null;
+      $("ft").textContent = "Add user";
+      $("ab").textContent = "Add user";
+      $("ac").hidden = true;
+      ["an", "ai"].forEach((i) => $(i).value = "");
+      $("aa").checked = $("ar").checked = false;
+    }
+    $("ac").onclick = () => { endEdit(); $("am").textContent = ""; };
+    $("ab").onclick = async () => {
+      const r = await api("/api/users/save", { original: editing || "", name: $("an").value.trim(), id: $("ai").value, type: $("at").value, authorized: $("aa").checked, restricted: $("ar").checked });
+      if (!r) return;
+      if (!r.ok) { $("am").textContent = r.data.message; return; }
+      $("am").textContent = "";
+      toast(r.data.message);
+      endEdit();
+      await loadState();
+      render();
+    };
+
+    // ---------- every click on the page ----------
+    document.addEventListener("click", async (e) => {
+      const el = e.target.closest("[data-tab],[data-e],[data-d],[data-t]"), d = el ? el.dataset : {};
+      if (d.tab) show(d.tab);
+      if (role != "admin") return;
+      if (d.e) {
+        const u = S.users[d.e];
+        editing = d.e;
+        $("ft").textContent = "Edit user";
+        $("ab").textContent = "Save changes";
+        $("ac").hidden = false;
+        $("an").value = d.e; $("ai").value = u.id; $("at").value = u.t;
+        $("aa").checked = !!u.a; $("ar").checked = !!u.r;
+        $("am").textContent = "";
+        window.scrollTo(0, 0);
+      }
+      if (d.d) {
+        if (pend == d.d) {
+          pend = null;
+          await api("/api/users/delete", { name: d.d });
+          toast(d.d + " removed");
+          await loadState();
+        } else pend = d.d;
+        render();
+      } else if (pend && !d.d) { pend = null; render(); }
+      if (d.t) {
+        await api("/api/relations/toggle", { key: d.t });
+        await loadState();
+        render();
+      }
+    });
+
+    // ---------- Number theory ----------
+    $("evenRule").onchange = (e) => { S.even = e.target.checked; api("/api/even", { even: e.target.checked }); };
+    $("nbtn").onclick = async () => {
+      const r = await api("/api/calc", { a: $("na").value, b: $("nb").value });
+      if (!r) return;
+      if (!r.ok) { $("nr").innerHTML = `<p class="n">${esc(r.data.error)}</p>`; return; }
+      const c = r.data;
+      $("nr").innerHTML = `<p>gcd = <b>${c.gcd}</b><br>lcm = <b>${c.lcm}</b><br>${c.a} mod ${c.b} = <b>${c.mod}</b><br>${c.gcd == 1 ? '<span class="y">Coprime: they can share a locker.</span>' : '<span class="n">Not coprime.</span>'}</p>`;
+    };
+
+    // ---------- Access log ----------
+    $("lc").onclick = async () => { await api("/api/log/clear", {}); await loadState(); render(); };
+
+    // ---------- Logic proof ----------
+    $("vb").onclick = async () => {
+      const r = await api("/api/proof");
+      if (!r) return;
+      const p = r.data;
+      $("vr").innerHTML = p.violations.length
+        ? `<p class="n">Checked ${p.cases} cases. ${p.violations.length} violation(s): ${esc(p.violations.join(", "))}</p>`
+        : `<p class="y">Checked ${p.cases} cases. 0 violations. Restricted users are always denied, so the rule is consistent.</p>`;
+    };
+
+    // ---------- Backup ----------
+    $("be").onclick = async () => {
+      const r = await api("/api/backup/export");
+      if (!r) return;
+      $("bt").value = JSON.stringify(r.data);
+      $("bm").textContent = "Exported. Copy the text above.";
+    };
+    $("bi").onclick = async () => {
+      let data;
+      try { data = JSON.parse($("bt").value); } catch (e) { $("bm").textContent = "That text is not valid backup data."; return; }
+      const r = await api("/api/backup/import", data);
+      if (!r) return;
+      if (!r.ok) { $("bm").textContent = "That text is not valid backup data."; return; }
+      await loadState();
+      render();
+      $("bm").textContent = "Imported.";
+    };
+    $("br").onclick = async () => {
+      await api("/api/backup/reset", {});
+      await loadState();
+      render();
+      $("bm").textContent = "Data reset to defaults.";
+    };
+
+    // ---------- when the page opens: already signed in? ----------
+    api("/api/session").then((r) => { if (r && r.data.role) enter(r.data.role, r.data.me); });
+
+</script>
+</body></html>
